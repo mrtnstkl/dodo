@@ -1,9 +1,9 @@
 #pragma once
 #include <memory>
 #include <string>
-#include <sstream>
 #include <unordered_map>
 #include <vector>
+#include <utility>
 #include <glad/glad.h>
 
 #include "Dodo.h"
@@ -460,6 +460,20 @@ namespace dodo
 			void set_uniform(GLint location, GLfloat f1, GLfloat f2, GLfloat f3, GLfloat f4) const;
 			// Sets the value of a vec4 uniform using glUniform4fv
 			void set_uniform(GLint location, const glm::vec4& vec) const;
+			// Sets the value of a double uniform using glUniform1d
+			void set_uniform(GLint location, GLdouble d) const;
+			// Sets the value of a dvec2 uniform using glUniform2d
+			void set_uniform(GLint location, GLdouble d1, GLdouble d2) const;
+			// Sets the value of a dvec2 uniform using glUniform2dv
+			void set_uniform(GLint location, const glm::dvec2& vec) const;
+			// Sets the value of a dvec3 uniform using glUniform3d
+			void set_uniform(GLint location, GLdouble d1, GLdouble d2, GLdouble d3) const;
+			// Sets the value of a dvec3 uniform using glUniform3dv
+			void set_uniform(GLint location, const glm::dvec3& vec) const;
+			// Sets the value of a dvec4 uniform using glUniform4d
+			void set_uniform(GLint location, GLdouble d1, GLdouble d2, GLdouble d3, GLdouble d4) const;
+			// Sets the value of a dvec4 uniform using glUniform4dv
+			void set_uniform(GLint location, const glm::dvec4& vec) const;
 			// Sets the value of a int uniform using glUniform1i
 			void set_uniform(GLint location, GLint i) const;
 			// Sets the value of a ivec2 uniform using glUniform2i
@@ -480,65 +494,15 @@ namespace dodo
 			void set_uniform(GLint location, const glm::mat3& mat) const;
 			// Sets the value of a mat4 uniform using glUniformMatrix4fv
 			void set_uniform(GLint location, const glm::mat4& mat) const;
+			// Sets the value of a mat3 uniform using glUniformMatrix3fv
+			void set_uniform(GLint location, const glm::dmat3& mat) const;
+			// Sets the value of a mat4 uniform using glUniformMatrix4fv
+			void set_uniform(GLint location, const glm::dmat4& mat) const;
 			// Sets the value of a texture uniform and binds that texture to the given unit
 			void set_uniform(GLint location, const dodo::texture& texture, int tex_unit) const;
 
-
-			// Sets the value of a float uniform using glUniform1f
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(GLfloat f) const;
-			// Sets the value of a vec2 uniform using glUniform2f
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(GLfloat f1, GLfloat f2) const;
-			// Sets the value of a vec2 uniform using glUniform2fv
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(const glm::vec2& vec) const;
-			// Sets the value of a vec3 uniform using glUniform3f
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(GLfloat f1, GLfloat f2, GLfloat f3) const;
-			// Sets the value of a vec3 uniform using glUniform3fv
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(const glm::vec3& vec) const;
-			// Sets the value of a vec4 uniform using glUniform4f
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(GLfloat f1, GLfloat f2, GLfloat f3, GLfloat f4) const;
-			// Sets the value of a vec4 uniform using glUniform4fv
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(const glm::vec4& vec) const;
-			// Sets the value of a int uniform using glUniform1i
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(GLint i) const;
-			// Sets the value of a ivec2 uniform using glUniform2i
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(GLint i1, GLint i2) const;
-			// Sets the value of a ivec3 uniform using glUniform3i
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(GLint i1, GLint i2, GLint i3) const;
-			// Sets the value of a ivec4 uniform using glUniform4i
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(GLint i1, GLint i2, GLint i3, GLint i4) const;
-			// Sets the value of a unsigned int uniform using glUniform1ui
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(GLuint i) const;
-			// Sets the value of a uvec2 uniform using glUniform2ui
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(GLuint i1, GLuint i2) const;
-			// Sets the value of a uvec3 uniform using glUniform3ui
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(GLuint i1, GLuint i2, GLuint i3) const;
-			// Sets the value of a uvec4 uniform using glUniform4ui
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(GLuint i1, GLuint i2, GLuint i3, GLuint i4) const;
-			// Sets the value of a mat3 uniform using glUniformMatrix3fv
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(const glm::mat3& mat) const;
-			// Sets the value of a mat4 uniform using glUniformMatrix4fv
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(const glm::mat4& mat) const;
-			// Sets the value of a texture uniform and binds that texture to the given unit
-			template<util::string_literal_wrapper UniformName>
-			void set_uniform(const dodo::texture& texture, int tex_unit) const;
-
+			template <dodo::util::string_literal_wrapper UniformName, typename... Args>
+			void set_uniform(Args&&... args) const;
 		};
 
 	}
@@ -552,110 +516,8 @@ GLint dodo::shader::shader_program::uniform_location() const
 	return it != uniforms_.end() ? it->second.location : -1;
 }
 
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(GLfloat f) const
+template <dodo::util::string_literal_wrapper UniformName, typename... Args>
+void dodo::shader::shader_program::set_uniform(Args&&... args) const
 {
-	set_uniform(uniform_location<UniformName>(), f);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(GLfloat f1, GLfloat f2) const
-{
-	set_uniform(uniform_location<UniformName>(), f1, f2);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(const glm::vec2& vec) const
-{
-	set_uniform(uniform_location<UniformName>(), vec);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(GLfloat f1, GLfloat f2, GLfloat f3) const
-{
-	set_uniform(uniform_location<UniformName>(), f1, f2, f3);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(const glm::vec3& vec) const
-{
-	set_uniform(uniform_location<UniformName>(), vec);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(GLfloat f1, GLfloat f2, GLfloat f3, GLfloat f4) const
-{
-	set_uniform(uniform_location<UniformName>(), f1, f2, f3, f4);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(const glm::vec4& vec) const
-{
-	set_uniform(uniform_location<UniformName>(), vec);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(GLint i) const
-{
-	set_uniform(uniform_location<UniformName>(), i);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(GLint i1, GLint i2) const
-{
-	set_uniform(uniform_location<UniformName>(), i1, i2);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(GLint i1, GLint i2, GLint i3) const
-{
-	set_uniform(uniform_location<UniformName>(), i1, i2, i3);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(GLint i1, GLint i2, GLint i3, GLint i4) const
-{
-	set_uniform(uniform_location<UniformName>(), i1, i2, i3, i4);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(GLuint i) const
-{
-	set_uniform(uniform_location<UniformName>(), i);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(GLuint i1, GLuint i2) const
-{
-	set_uniform(uniform_location<UniformName>(), i1, i2);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(GLuint i1, GLuint i2, GLuint i3) const
-{
-	set_uniform(uniform_location<UniformName>(), i1, i2, i3);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(GLuint i1, GLuint i2, GLuint i3, GLuint i4) const
-{
-	set_uniform(uniform_location<UniformName>(), i1, i2, i3, i4);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(const glm::mat3& mat) const
-{
-	set_uniform(uniform_location<UniformName>(), mat);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(const glm::mat4& mat) const
-{
-	set_uniform(uniform_location<UniformName>(), mat);
-}
-
-template <dodo::util::string_literal_wrapper UniformName>
-void dodo::shader::shader_program::set_uniform(const dodo::texture& texture, int tex_unit) const
-{
-	set_uniform(uniform_location<UniformName>(), texture, tex_unit);
+	set_uniform(uniform_location<UniformName>(), std::forward<Args>(args)...);
 }

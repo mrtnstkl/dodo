@@ -536,6 +536,49 @@ void dodo::shader::shader_program::set_uniform(GLint location, const glm::vec4& 
 	glUniform4fv(location, 1, glm::value_ptr(vec));
 }
 
+
+void dodo::shader::shader_program::set_uniform(GLint location, GLdouble d) const
+{
+	use();
+	glUniform1f(location, d);
+}
+
+void dodo::shader::shader_program::set_uniform(GLint location, GLdouble d1, GLdouble d2) const
+{
+	use();
+	glUniform2f(location, d1, d2);
+}
+
+void dodo::shader::shader_program::set_uniform(GLint location, const glm::dvec2& vec) const
+{
+	use();
+	glUniform2dv(location, 1, glm::value_ptr(vec));
+}
+
+void dodo::shader::shader_program::set_uniform(GLint location, GLdouble d1, GLdouble d2, GLdouble d3) const
+{
+	use();
+	glUniform3d(location, d1, d2, d3);
+}
+
+void dodo::shader::shader_program::set_uniform(GLint location, const glm::dvec3& vec) const
+{
+	use();
+	glUniform3dv(location, 1, glm::value_ptr(vec));
+}
+
+void dodo::shader::shader_program::set_uniform(GLint location, GLdouble d1, GLdouble d2, GLdouble d3, GLdouble d4) const
+{
+	use();
+	glUniform4d(location, d1, d2, d3, d4);
+}
+
+void dodo::shader::shader_program::set_uniform(GLint location, const glm::dvec4& vec) const
+{
+	use();
+	glUniform4dv(location, 1, glm::value_ptr(vec));
+}
+
 void dodo::shader::shader_program::set_uniform(GLint location, GLint i) const
 {
 	use();
@@ -594,6 +637,18 @@ void dodo::shader::shader_program::set_uniform(GLint location, const glm::mat4& 
 {
 	use();
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
+}
+
+void dodo::shader::shader_program::set_uniform(GLint location, const glm::dmat3& mat) const
+{
+	use();
+	glUniformMatrix3dv(location, 1, GL_FALSE, glm::value_ptr(mat));
+}
+
+void dodo::shader::shader_program::set_uniform(GLint location, const glm::dmat4& mat) const
+{
+	use();
+	glUniformMatrix4dv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 void dodo::shader::shader_program::set_uniform(GLint location, const dodo::texture& texture, int tex_unit) const
