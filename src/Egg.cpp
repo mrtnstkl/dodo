@@ -2,7 +2,6 @@
 
 #include "DefaultShaders.h"
 
-static egg::application* app;
 
 void egg::application::handle_wasd_movement()
 {
@@ -36,7 +35,6 @@ egg::application::application(const char* title, int width, int height, bool res
 	settings.width = width;
 	settings.height = height;
 	settings.resizeable = resizeable;
-	::app = this;
 }
 
 void egg::application::setup()
@@ -118,29 +116,29 @@ void egg::application::on_cursor_pos(GLFWwindow* window, double x_pos, double y_
 {
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) != GLFW_PRESS)
 	{
-		app->mouse.pressed = false;
+		mouse.pressed = false;
 		return;
 	}
-	if (app->mouse.pressed)
+	if (mouse.pressed)
 	{
 		const float rotate_angle = -0.005f;
-		app->default_camera_controller->yaw(rotate_angle * static_cast<float>(app->mouse.x - x_pos));
-		app->default_camera_controller->pitch(rotate_angle * -static_cast<float>(app->mouse.y - y_pos));
-		app->mouse.x = x_pos;
-		app->mouse.y = y_pos;
+		default_camera_controller->yaw(rotate_angle * static_cast<float>(mouse.x - x_pos));
+		default_camera_controller->pitch(rotate_angle * -static_cast<float>(mouse.y - y_pos));
+		mouse.x = x_pos;
+		mouse.y = y_pos;
 	}
 	else
 	{
-		app->mouse.x = x_pos;
-		app->mouse.y = y_pos;
-		app->mouse.pressed = true;
+		mouse.x = x_pos;
+		mouse.y = y_pos;
+		mouse.pressed = true;
 	}
 }
 
 void egg::application::on_scroll(GLFWwindow* window, double x_offset, double y_offset)
 {
 	const float zoom_distance = -2.f * y_offset;
-	app->default_camera_controller->set_distance(app->default_camera_controller->distance() + zoom_distance);
+	default_camera_controller->set_distance(default_camera_controller->distance() + zoom_distance);
 }
 
 void egg::application::on_framebuffer_size_change(GLFWwindow* window, int width, int height)
