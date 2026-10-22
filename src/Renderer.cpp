@@ -342,6 +342,11 @@ void dodo::renderer::set_clear_color(const glm::vec4& clear_color)
 	clear_color_ = clear_color;
 }
 
+void dodo::renderer::set_clear_color(const glm::vec3& clear_color)
+{
+	clear_color_ = glm::vec4(clear_color, 1.0f);
+}
+
 void dodo::renderer::set_camera(const std::shared_ptr<dodo::camera>& camera)
 {
 	camera_ = camera;

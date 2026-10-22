@@ -117,6 +117,8 @@ namespace dodo
 		 */
 		void set_clear_color(const glm::vec4& clear_color);
 
+		void set_clear_color(const glm::vec3& clear_color);
+
 		void set_camera(const std::shared_ptr<dodo::camera>& camera);
 
 		[[deprecated]] void set_backface_culling(bool b);
