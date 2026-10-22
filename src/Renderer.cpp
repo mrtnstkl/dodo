@@ -137,10 +137,11 @@ void dodo::renderer::render_model(const model& model, const shader::shader_progr
 	}
 	else
 	{
-		if (shader.uf_locations().camera_position != -1)
-			glUniform3f(shader.uf_locations().camera_position, 0, 0, 0);
-		if (shader.uf_locations().view_proj_matrix != -1)
-			glUniformMatrix4fv(shader.uf_locations().view_proj_matrix, 1, false, value_ptr(glm::mat4(1)));
+		// TODO: should probably remove this to let users set camera_position and view-proj_matrix themselves.
+		// if (shader.uf_locations().camera_position != -1)
+		// 	glUniform3f(shader.uf_locations().camera_position, 0, 0, 0);
+		// if (shader.uf_locations().view_proj_matrix != -1)
+		// 	glUniformMatrix4fv(shader.uf_locations().view_proj_matrix, 1, false, value_ptr(glm::mat4(1)));
 	}
 
 
