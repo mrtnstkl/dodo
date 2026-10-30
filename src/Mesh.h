@@ -101,7 +101,7 @@ namespace dodo
 		 * \brief	Draws the mesh.
 		 * \param mode	the opengl drawing mode
 		 */
-		void draw(GLenum mode = GL_TRIANGLES) const;
+		virtual void draw(GLenum mode = GL_TRIANGLES) const;
 
 		// todo
 		void draw_triangles() const;
