@@ -98,7 +98,7 @@ class application : public dodo::application
 		}
 	};
 
-	dodo::instanced::instanced_model<custom_instanced_struct>* spheres;
+	dodo::model* spheres;
 
 	struct {
 		double x = 0, y = 0;
@@ -142,26 +142,24 @@ void application::scene_init()
 	auto material = dodo::materials::standard();
 	material.texture = std::make_shared<dodo::texture>(dodo::texture::from_image_file(ASSET_PATH "textures/tiles_diffuse.png"));
 
-	// create an instanced model with our custom instance struct
-	// each instance has a position and a color, which can be individually set
-	spheres = new dodo::instanced::instanced_model<custom_instanced_struct>(
-		new dodo::standard_mesh(dodo::standard_mesh::generate_sphere(1, 12, 6)),
-		{0,0,0}, material
-	);
-	// we initialize the model with 1000 instances, and set their positions and colors randomly
-	int sphere_count = 1000;
-	spheres->set_array_size(sphere_count);
-	spheres->set_draw_amount(sphere_count);
-	std::uniform_real_distribution<float> pos(-50.f, 50.f);
-	std::uniform_real_distribution<float> col(0.f, 1.f);
+	// create an instanced mesh with our custom instance struct
+	// we use a sphere mesh and initialize the instance array with 1000 elements
+	auto* instanced_mesh =
+		new dodo::instanced::instanced_mesh<dodo::vertex_structs::vertex3_norm_uv, custom_instanced_struct>(
+			dodo::standard_mesh::generate_sphere(1, 12, 6),
+			1000);
+	// each instance has a position and a color
+	// here we set them to random values
 	std::default_random_engine rng;
-	for (auto& sphere : *spheres)
+	std::uniform_real_distribution<float> pos(-50.f, 50.f), col(0.f, 1.f);
+	for (auto& instance : *instanced_mesh)
 	{
-		sphere.pos = { pos(rng), pos(rng), pos(rng) };
-		sphere.color = { col(rng), col(rng), col(rng) };
+		instance.pos = { pos(rng), pos(rng), pos(rng) };
+		instance.color = { col(rng), col(rng), col(rng) };
 	}
 	// after modifying the instance data, we need to call update_instance_buffer to copy the changes to the GPU
-	spheres->update_instance_buffer();
+	instanced_mesh->update_instance_buffer();
+	spheres = new dodo::model(instanced_mesh, {0, 0, 0}, material);
 }
 
 void application::scene_destroy()
