@@ -1,6 +1,5 @@
 #include "Model.h"
 
-#include "Shader.h"
 
 void dodo::model::calculate_model_matrix()
 {
@@ -79,13 +78,6 @@ void dodo::model::set_material(material material)
 {
 	material_ = material;
 }
-
-
-dodo::mesh_base& dodo::model::mesh()
-{
-	return *mesh_;
-}
-
 
 void dodo::model::draw(GLenum mode) const
 {

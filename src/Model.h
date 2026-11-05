@@ -4,7 +4,6 @@
 #include "Entity.h"
 #include "Material.h"
 #include "Mesh.h"
-#include "Texture.h"
 
 namespace dodo
 {
@@ -52,7 +51,8 @@ namespace dodo
 
 		void set_material(material material);
 
-		mesh_base& mesh();
+		template <typename T = mesh_base>
+		T& mesh();
 
 		/**
 		 * \brief	Draws the model.
@@ -81,4 +81,15 @@ namespace dodo
 		const glm::vec3& scale(const glm::vec3 & relative_scale) override;
 
 	};
+
+	template <typename T>
+	T& model::mesh()
+	{
+		static_assert(std::is_base_of_v<mesh_base, T>, "T must be derived from mesh_base");
+		if constexpr (std::is_same_v<T, mesh_base>)
+			return *mesh_;
+		else
+			return *dynamic_cast<T*>(mesh_);
+	}
+
 }
