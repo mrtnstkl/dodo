@@ -1,11 +1,14 @@
 #pragma once
 
 
+#include <memory>
 #include "Dodo.h"
 #include "Camera.h"
 #include "Light.h"
 #include "Model.h"
 #include "Shader.h"
+#include "Text.h"
+#include "glm/ext/vector_float2.hpp"
 
 
 namespace dodo
@@ -47,6 +50,10 @@ namespace dodo
 			const standard_mesh skybox_mesh;
 			const standard_mesh render_quad;
 		} utilities_;
+		struct
+		{
+			std::unique_ptr<shader::shader_program> text;
+		} shaders_;
 
 		virtual void apply_render_flags(render_flag_mask flag_mask);
 
@@ -90,6 +97,14 @@ namespace dodo
 		 * \param shader	the shader to be used for rendering
 		 */
 		void render_texture(const texture& texture, const shader::shader_program& shader);
+
+		/**
+		 * \brief	Renders a text block.
+		 * \param text	the text block to be rendered
+		 * \param pos	the position of the text block. top left is (0,0), bottom right is (1,1)
+		 * \param scale	the scaling of the text block
+		 */
+		void render_text(text_block& text, glm::vec2 pos = {0, 0}, float scale = 2.f);
 
 		/**
 		 * \brief	Configures opengl's state based on the flags that have been set for the renderer,

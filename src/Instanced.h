@@ -1,6 +1,7 @@
 #pragma once
 
 #include <climits>
+#include <vector>
 #include "Dodo.h"
 #include "Mesh.h"
 #include "Model.h"
@@ -82,6 +83,11 @@ namespace dodo::instanced
 		T &operator[](uint index);
 
 		/**
+		 * \brief	Returns a reference to the instance array.
+		 */
+		std::vector<T>& instance_data();
+
+		/**
 		 * \brief	Returns iterator, to iterate over instances.
 		 */
 		typename std::vector<T>::iterator begin();
@@ -107,7 +113,7 @@ namespace dodo::instanced
 		instanced_mesh &operator=(instanced_mesh<V, I> &&other) noexcept;
 		~instanced_mesh() override = default;
 
-		void draw(GLenum ignored) const override;
+		void draw(GLenum ignored = NULL) const override;
 		/**
 		 * \brief	Defines how many instances should be drawn.
 		 * \param amount	maximum amount of instances to draw (draw
@@ -196,6 +202,12 @@ namespace dodo::instanced
 	T &instanced_array<T>::operator[](uint index)
 	{
 		return instance_array_[index];
+	}
+
+	template <typename T>
+	std::vector<T>& instanced_array<T>::instance_data()
+	{
+		return instance_array_;
 	}
 
 	template <typename T>

@@ -1,5 +1,10 @@
 #include "Renderer.h"
+#include <iostream>
+#include <memory>
+#include "DefaultShaders.h"
 #include "Light.h"
+#include "Shader.h"
+#include "glm/ext/vector_float3.hpp"
 
 void dodo::renderer::apply_render_flags()
 {
@@ -54,6 +59,21 @@ dodo::renderer::renderer()
 		dodo::standard_mesh::generate_2d_rect(2, 2) // utilities_.render_quad
 	}
 {
+	shaders_.text = std::make_unique<shader::shader_program>(
+		std::make_shared<shader::shader>(shader::vertex_shader, text_block::shader_source_vertex, shader::source_code),
+		std::make_shared<shader::shader>(shader::fragment_shader, text_block::shader_source_fragment,
+										 shader::source_code),
+		true, true);
+	if (!shaders_.text->ready())
+	{
+		std::cerr << "Failed to compile text shader: " << shaders_.text->error_msg() << std::endl;
+		throw std::runtime_error("Failed to compile text shader");
+	}
+	else
+	{
+		shaders_.text->print_debug_info(std::cout);
+	}
+
 	glGenSamplers(1, &nearest_texture_sampler);
 	glSamplerParameteri(nearest_texture_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glSamplerParameteri(nearest_texture_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -317,6 +337,33 @@ void dodo::renderer::render_texture(const texture& texture, const shader::shader
 	texture.bind(shader.uf_locations().color_texture, 0);
 	utilities_.render_quad.draw();
 
+	glEnable(GL_DEPTH_TEST);
+
+	temp_positive_flags_ = 0;
+	temp_negative_flags_ = 0;
+}
+
+void dodo::renderer::render_text(text_block &text, glm::vec2 pos, float scale)
+{
+	shaders_.text->set_uniform<"atlas_glyphs_per_row", int>(text.font_->glyphs_per_row());
+	shaders_.text->set_uniform<"atlas_glyph_scale", glm::vec2>(text.font_->glyph_uv_scale());
+	shaders_.text->set_uniform<"grid_size", glm::ivec2>({text.columns_, text.rows_});
+	int fb_width = 800, fb_height = 800; // TODO: DONT HARDCODE
+	shaders_.text->set_uniform<"cell_size", glm::vec2>({float(font::glyph::width) / fb_width, float(font::glyph::height) / fb_height});
+	shaders_.text->set_uniform<"atlas">(text.font_->atlas(), 0);
+	shaders_.text->set_uniform<"color">(text.color_);
+	shaders_.text->set_uniform<"scale">(scale);
+	shaders_.text->set_uniform<"origin">(pos);
+
+	glDisable(GL_DEPTH_TEST);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquation(GL_FUNC_ADD);
+	glBindSampler(0, nearest_texture_sampler);
+	shaders_.text->use();
+	text.update();
+	text.mesh_.draw();
 	glEnable(GL_DEPTH_TEST);
 
 	temp_positive_flags_ = 0;
