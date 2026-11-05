@@ -478,10 +478,16 @@ namespace dodo
 			void set_uniform(GLint location, GLint i) const;
 			// Sets the value of a ivec2 uniform using glUniform2i
 			void set_uniform(GLint location, GLint i1, GLint i2) const;
+			// Sets the value of a ivec2 uniform using glUniform2iv
+			void set_uniform(GLint location, const glm::ivec2& vec) const;
 			// Sets the value of a ivec3 uniform using glUniform3i
 			void set_uniform(GLint location, GLint i1, GLint i2, GLint i3) const;
+			// Sets the value of a ivec3 uniform using glUniform3iv
+			void set_uniform(GLint location, const glm::ivec3& vec) const;
 			// Sets the value of a ivec4 uniform using glUniform4i
 			void set_uniform(GLint location, GLint i1, GLint i2, GLint i3, GLint i4) const;
+			// Sets the value of a ivec4 uniform using glUniform4iv
+			void set_uniform(GLint location, const glm::ivec4& vec) const;
 			// Sets the value of a unsigned int uniform using glUniform1ui
 			void set_uniform(GLint location, GLuint i) const;
 			// Sets the value of a uvec2 uniform using glUniform2ui
