@@ -1,7 +1,7 @@
 #include "Renderer.h"
 #include <iostream>
 #include <memory>
-#include "DefaultShaders.h"
+#include "Framebuffer.h"
 #include "Light.h"
 #include "Shader.h"
 #include "glm/ext/vector_float3.hpp"
@@ -348,8 +348,9 @@ void dodo::renderer::render_text(text_block &text, glm::vec2 pos, float scale)
 	shaders_.text->set_uniform<"atlas_glyphs_per_row", int>(text.font_->glyphs_per_row());
 	shaders_.text->set_uniform<"atlas_glyph_scale", glm::vec2>(text.font_->glyph_uv_scale());
 	shaders_.text->set_uniform<"grid_size", glm::ivec2>({text.columns_, text.rows_});
-	int fb_width = 800, fb_height = 800; // TODO: DONT HARDCODE
-	shaders_.text->set_uniform<"cell_size", glm::vec2>({float(font::glyph::width) / fb_width, float(font::glyph::height) / fb_height});
+	shaders_.text->set_uniform<"cell_size", glm::vec2>(
+		{float(font::glyph::width) / framebuffer::default_frambuffer::instance().width(),
+		 float(font::glyph::height) / framebuffer::default_frambuffer::instance().height()});
 	shaders_.text->set_uniform<"atlas">(text.font_->atlas(), 0);
 	shaders_.text->set_uniform<"color">(text.color_);
 	shaders_.text->set_uniform<"scale">(scale);

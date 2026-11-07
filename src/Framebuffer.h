@@ -1,6 +1,8 @@
 #pragma once
 
+#include <memory>
 #include "Dodo.h"
+#include "GLFW/glfw3.h"
 #include "Texture.h"
 
 typedef unsigned int uint;
@@ -39,9 +41,23 @@ namespace dodo::framebuffer
 
 	class none;
 
+	class framebuffer_base
+	{
+	public:
+		virtual GLuint handle() const = 0;
+		virtual uint width() const = 0;
+		virtual uint height() const = 0;
+
+		/**
+		 * \brief	Binds the framebuffer.
+		 */
+		void bind(GLenum target = GL_FRAMEBUFFER) const;
+
+		void blit_to(framebuffer_base& other, GLbitfield buffer = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	};
 
 	template <typename C = none, typename D = none>
-	class framebuffer
+	class framebuffer : public framebuffer_base
 	{
 		static_assert(std::is_same_v<C, texture> || std::is_same_v<C, renderbuffer> || std::is_same_v<C, none>,
 			"C must be of type texture, renderbuffer, or none");
@@ -81,6 +97,9 @@ namespace dodo::framebuffer
 
 		~framebuffer();
 
+		GLuint handle() const override;
+		uint width() const override;
+		uint height() const override;
 
 		const C& color() const;
 
@@ -95,27 +114,14 @@ namespace dodo::framebuffer
 		 * \brief	Returns a shared pointer to the depth buffer.
 		 */
 		std::shared_ptr<D> depth_ptr();
-
-		uint width() const;
-		uint height() const;
-
-		/**
-		 * \brief	Binds the framebuffer.
-		 */
-		void bind(GLenum target = GL_FRAMEBUFFER) const;
-
-		template <typename F>
-		void blit_to(F& other, GLbitfield buffer = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		void blit_to_default(GLbitfield buffer = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) const;
-
-		void blit_from_default(GLbitfield buffer = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) const;
 	};
+
 
 	using framebuffer_rr = framebuffer<renderbuffer, renderbuffer>;
 	using framebuffer_tr = framebuffer<texture, renderbuffer>;
 	using framebuffer_rt = framebuffer<renderbuffer, texture>;
 	using framebuffer_tt = framebuffer<texture, texture>;
+
 
 	class none
 	{
@@ -128,6 +134,20 @@ namespace dodo::framebuffer
 		friend class framebuffer<texture, none>;
 		friend class framebuffer<renderbuffer, none>;
 	};
+
+
+	class default_frambuffer : public framebuffer_base
+	{
+		GLFWwindow* window_;
+		default_frambuffer(GLFWwindow* window);
+	public:
+		static std::shared_ptr<default_frambuffer> instance_ptr();
+		static default_frambuffer &instance();
+		GLuint handle() const override;
+		uint width() const override;
+		uint height() const override;
+	};
+
 
 	void bind_default(GLenum target = GL_FRAMEBUFFER);
 
@@ -226,6 +246,24 @@ namespace dodo::framebuffer
 	}
 
 	template <typename C, typename D>
+	GLuint framebuffer<C, D>::handle() const
+	{
+		return framebuffer_handle_;
+	}
+
+	template <typename C, typename D>
+	uint framebuffer<C, D>::width() const
+	{
+		return width_;
+	}
+
+	template <typename C, typename D>
+	uint framebuffer<C, D>::height() const
+	{
+		return height_;
+	}
+
+	template <typename C, typename D>
 	const C& framebuffer<C, D>::color() const
 	{
 		return *color_;
@@ -247,74 +285,5 @@ namespace dodo::framebuffer
 	std::shared_ptr<D> framebuffer<C, D>::depth_ptr()
 	{
 		return depth_;
-	}
-
-	template <typename C, typename D>
-	void framebuffer<C, D>::bind(GLenum target) const
-	{
-		glBindFramebuffer(target, framebuffer_handle_);
-	}
-
-	template <typename C, typename D>
-	uint framebuffer<C, D>::width() const
-	{
-		return width_;
-	}
-
-	template <typename C, typename D>
-	uint framebuffer<C, D>::height() const
-	{
-		return height_;
-	}
-
-	template <typename C, typename D>
-	template <typename F>
-	void framebuffer<C, D>::blit_to(F& other, GLbitfield buffer)
-	{
-		GLint draw_bak = 0, read_bak = 0;
-		glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &read_bak);
-		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &draw_bak);
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer_handle_);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, other.framebuffer_handle_);
-
-		glBlitFramebuffer(0, 0, width_, height_, 0, 0, other.width_, other.height_, buffer, GL_NEAREST);
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, read_bak);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, draw_bak);
-	}
-
-	template <typename C, typename D>
-	void framebuffer<C, D>::blit_to_default(GLbitfield buffer) const
-	{
-		GLint draw_bak = 0, read_bak = 0;
-		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &draw_bak);
-		glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &read_bak);
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer_handle_);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
-		// todo: width & height of default
-		glBlitFramebuffer(0, 0, width_, height_, 0, 0, width_, height_, buffer, GL_NEAREST);
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, read_bak);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, draw_bak);
-	}
-
-	template <typename C, typename D>
-	void framebuffer<C, D>::blit_from_default(GLbitfield buffer) const
-	{
-		GLint draw_bak = 0, read_bak = 0;
-		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &draw_bak);
-		glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &read_bak);
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer_handle_);
-
-		// todo: width & height of default
-		glBlitFramebuffer(0, 0, width_, height_, 0, 0, width_, height_, buffer, GL_NEAREST);
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, read_bak);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, draw_bak);
 	}
 }
