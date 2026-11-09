@@ -18,6 +18,7 @@ namespace dodo
 	class font
 	{
 	public:
+
 		struct glyph
 		{
 			static constexpr size_t width = 8;
@@ -73,11 +74,9 @@ namespace dodo
 		instanced::instanced_mesh<billboard_vertex, character_instance> mesh_;
 		std::shared_ptr<font> font_;
 
-		framebuffer::framebuffer<texture> canvas_; // todo: unused
 		std::stringstream input_;
 		bool needs_redraw_ = true;
 
-		glm::vec3 color_ = dodo::color::WHITE;
 		bool wrap_;
 		bool follow_;
 
@@ -100,6 +99,23 @@ namespace dodo
 		 * \brief Clears all text from the textblock.
 		 */
 		void clear();
+
+		/**
+		 * \brief Returns the width of the text block in pixels.
+		 */
+		size_t width() const;
+		/**
+		 * \brief Returns the height of the text block in pixels.
+		 */
+		size_t height() const;
+		/**
+		 * \brief Returns the number of rows in the text block.
+		 */
+		size_t rows() const;
+		/**
+		 * \brief Returns the number of columns in the text block.
+		 */
+		size_t columns() const;
 
 		/**
 		 * \brief Appends to the end of the text block.

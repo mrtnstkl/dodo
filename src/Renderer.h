@@ -5,6 +5,7 @@
 #include "Dodo.h"
 #include "Camera.h"
 #include "Light.h"
+#include "Material.h"
 #include "Model.h"
 #include "Shader.h"
 #include "Text.h"
@@ -104,7 +105,7 @@ namespace dodo
 		 * \param pos	the position of the text block. top left is (0,0), bottom right is (1,1)
 		 * \param scale	the scaling of the text block
 		 */
-		void render_text(text_block& text, glm::vec2 pos = {0, 0}, float scale = 2.f);
+		void render_text(text_block& text, glm::vec2 pos = {0, 0}, float scale = 2.f, glm::vec3 color = color::WHITE);
 
 		/**
 		 * \brief	Configures opengl's state based on the flags that have been set for the renderer,

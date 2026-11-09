@@ -222,7 +222,6 @@ dodo::text_block::text_block(int rows, int columns, bool wrap, bool follow)
 	, lines_(1)
 	, mesh_(columns * rows)
 	, font_(font::default_font())
-	, canvas_(columns * font::glyph::width, rows * font::glyph::height)
 	, wrap_(wrap)
 	, follow_(follow)
 {
@@ -246,6 +245,14 @@ void dodo::text_block::clear()
 	lines_.emplace_back();
 	needs_redraw_ = true;
 }
+
+size_t dodo::text_block::width() const { return columns_ * font::glyph::width; }
+
+size_t dodo::text_block::height() const { return rows_ * font::glyph::height; }
+
+size_t dodo::text_block::rows() const { return rows_; }
+
+size_t dodo::text_block::columns() const { return columns_; }
 
 std::stringstream &dodo::text_block::input() { return input_; }
 
@@ -323,7 +330,7 @@ void main() {
 		gl_InstanceID % grid_size.x,
 		gl_InstanceID / grid_size.x
 	) + position) * cell_size * scale;
-	gl_Position = vec4(instance_pos.x - 1 + origin.x, 1 - instance_pos.y - origin.y, 0, 1);
+	gl_Position = vec4(instance_pos.x - 1 + origin.x * 2, 1 - instance_pos.y - origin.y * 2, 0, 1);
 }
 )";
 
