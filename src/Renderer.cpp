@@ -349,8 +349,8 @@ void dodo::renderer::render_text(text_block &text, glm::vec2 pos, float scale)
 	shaders_.text->set_uniform<"atlas_glyph_scale", glm::vec2>(text.font_->glyph_uv_scale());
 	shaders_.text->set_uniform<"grid_size", glm::ivec2>({text.columns_, text.rows_});
 	shaders_.text->set_uniform<"cell_size", glm::vec2>(
-		{float(font::glyph::width) / framebuffer::default_frambuffer::instance().width(),
-		 float(font::glyph::height) / framebuffer::default_frambuffer::instance().height()});
+		{float(font::glyph::width) / framebuffer::get_bound_framebuffer()->width(),
+		 float(font::glyph::height) / framebuffer::get_bound_framebuffer()->height()});
 	shaders_.text->set_uniform<"atlas">(text.font_->atlas(), 0);
 	shaders_.text->set_uniform<"color">(text.color_);
 	shaders_.text->set_uniform<"scale">(scale);

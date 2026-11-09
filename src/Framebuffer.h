@@ -43,10 +43,16 @@ namespace dodo::framebuffer
 
 	class framebuffer_base
 	{
+	protected:
+		framebuffer_base() = default;
 	public:
 		virtual GLuint handle() const = 0;
 		virtual uint width() const = 0;
 		virtual uint height() const = 0;
+
+		virtual ~framebuffer_base();
+		framebuffer_base(framebuffer_base&& other) noexcept;
+		framebuffer_base& operator=(framebuffer_base&& other) noexcept;
 
 		/**
 		 * \brief	Binds the framebuffer.
@@ -149,8 +155,11 @@ namespace dodo::framebuffer
 	};
 
 
-	void bind_default(GLenum target = GL_FRAMEBUFFER);
+	[[deprecated]] void bind_default(GLenum target = GL_FRAMEBUFFER);
 
+	default_frambuffer& get_default();
+
+	const framebuffer_base* get_bound_framebuffer(GLenum target = GL_FRAMEBUFFER);
 
 	template <typename C, typename D>
 	framebuffer<C, D>::framebuffer(uint width, uint height, GLenum color_format, GLenum depth_format, GLenum color_type,

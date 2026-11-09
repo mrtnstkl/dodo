@@ -3,6 +3,37 @@
 #include "Dodo.h"
 #include "GLFW/glfw3.h"
 
+
+static const dodo::framebuffer::framebuffer_base** internal_get_bound_frambuffer(GLenum target)
+{
+	static thread_local const dodo::framebuffer::framebuffer_base* fb_read = &dodo::framebuffer::get_default();
+	static thread_local const dodo::framebuffer::framebuffer_base* fb_draw = &dodo::framebuffer::get_default();
+	switch (target)
+	{
+		case GL_READ_FRAMEBUFFER:
+			return &fb_read;
+		case GL_DRAW_FRAMEBUFFER:
+			return &fb_draw;
+		case GL_FRAMEBUFFER:
+			return &fb_draw; // since opengl also uses GL_FRAMEBUFFER_BINDING for GL_DRAW_FRAMEBUFFER_BINDING
+		default:
+			return nullptr;
+	}
+}
+
+static void internal_set_bound_frambuffer(GLenum target, const dodo::framebuffer::framebuffer_base* fb)
+{
+	if (target == GL_FRAMEBUFFER)
+	{
+		*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER) = fb;
+		*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER) = fb;
+	}
+	else
+	{
+		*internal_get_bound_frambuffer(target) = fb;
+	}
+}
+
 void dodo::framebuffer::renderbuffer::init()
 {
 	glBindRenderbuffer(GL_RENDERBUFFER, handle_);
@@ -54,9 +85,35 @@ void dodo::framebuffer::renderbuffer::bind() const
 	glBindRenderbuffer(GL_RENDERBUFFER, handle_);
 }
 
+dodo::framebuffer::framebuffer_base::~framebuffer_base()
+{
+	if (*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER_BINDING) == this)
+		*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER_BINDING) = nullptr;
+	if (*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER_BINDING) == this)
+		*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER_BINDING) = nullptr;
+}
+
+dodo::framebuffer::framebuffer_base::framebuffer_base(framebuffer_base &&other) noexcept
+{
+	if (*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER_BINDING) == &other)
+		*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER_BINDING) = this;
+	if (*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER_BINDING) == &other)
+		*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER_BINDING) = this;
+}
+
+dodo::framebuffer::framebuffer_base& dodo::framebuffer::framebuffer_base::operator=(framebuffer_base &&other) noexcept
+{
+	if (*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER_BINDING) == &other)
+		*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER_BINDING) = this;
+	if (*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER_BINDING) == &other)
+		*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER_BINDING) = this;
+	return *this;
+}
+
 void dodo::framebuffer::framebuffer_base::bind(GLenum target) const
 {
 	glBindFramebuffer(target, handle());
+	internal_set_bound_frambuffer(target, this);
 }
 
 void dodo::framebuffer::framebuffer_base::blit_to(dodo::framebuffer::framebuffer_base& other, GLbitfield buffer)
@@ -77,6 +134,16 @@ void dodo::framebuffer::framebuffer_base::blit_to(dodo::framebuffer::framebuffer
 void dodo::framebuffer::bind_default(GLenum target)
 {
 	default_frambuffer::instance().bind(target);
+}
+
+dodo::framebuffer::default_frambuffer& dodo::framebuffer::get_default()
+{
+	return default_frambuffer::instance();
+}
+
+const dodo::framebuffer::framebuffer_base* dodo::framebuffer::get_bound_framebuffer(GLenum target)
+{
+	return *internal_get_bound_frambuffer(target);
 }
 
 dodo::framebuffer::default_frambuffer::default_frambuffer(GLFWwindow* window)
