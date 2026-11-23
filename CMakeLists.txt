@@ -1,20 +1,15 @@
-cmake_minimum_required(VERSION 3.5.0)
+cmake_minimum_required(VERSION 3.13)
 project(dodo VERSION 0.1.0 LANGUAGES C CXX)
-cmake_policy(SET CMP0072 NEW)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-# Options
-option(DODO_BUILD_EXAMPLES "Build dodo example programs" ON)
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    set(dodo_examples_default ON)
+else()
+    set(dodo_examples_default OFF)
+endif()
+option(DODO_BUILD_EXAMPLES "Build dodo example programs" ${dodo_examples_default})
 
 # Dependencies
 find_package(OpenGL REQUIRED)
-
-if (CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-conversion-null -Wno-volatile -Wno-pointer-arith")
-endif()
 
 # ---- dodo library ----
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
@@ -28,6 +23,15 @@ add_library(dodo STATIC
     vendor/stb_image.cpp
 )
 
+target_compile_features(dodo PUBLIC cxx_std_20)
+set_target_properties(dodo PROPERTIES CXX_EXTENSIONS OFF)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(dodo PRIVATE
+        "$<$<COMPILE_LANGUAGE:CXX>:-Wno-conversion-null;-Wno-volatile;-Wno-pointer-arith>"
+    )
+endif()
+
 # Public compile definitions for users of the library
 target_compile_definitions(dodo PUBLIC IMGUI_DEFINE_MATH_OPERATORS)
 
@@ -38,17 +42,16 @@ target_include_directories(dodo
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/glad/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/glfw/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb>
 )
 
-set_property(TARGET dodo PROPERTY CXX_STANDARD 20)
-
 # GLFW: build it and link it into dodo
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory(vendor/glfw)
+if(NOT TARGET glfw)
+    set(GLFW_BUILD_DOCS OFF)
+    set(GLFW_BUILD_TESTS OFF)
+    set(GLFW_BUILD_EXAMPLES OFF)
+    add_subdirectory(vendor/glfw)
+endif()
 
 target_link_libraries(dodo
     PUBLIC
