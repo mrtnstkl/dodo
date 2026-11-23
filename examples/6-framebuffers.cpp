@@ -137,7 +137,7 @@ void application::update()
 	renderer->render_skybox(*skybox, *skybox_shader);
 
 	// copy the contents of the default framebuffer which we just rendered to the framebuffer of the plane
-	plane_buffer->blit_from_default();
+	dodo::framebuffer::get_default().blit_to(*plane_buffer);
 }
 
 void application::on_cursor_pos(GLFWwindow* window, double x_pos, double y_pos)
