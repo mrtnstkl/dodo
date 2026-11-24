@@ -87,26 +87,26 @@ void dodo::framebuffer::renderbuffer::bind() const
 
 dodo::framebuffer::framebuffer_base::~framebuffer_base()
 {
-	if (*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER_BINDING) == this)
-		*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER_BINDING) = nullptr;
-	if (*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER_BINDING) == this)
-		*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER_BINDING) = nullptr;
+	if (*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER) == this)
+		*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER) = nullptr;
+	if (*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER) == this)
+		*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER) = nullptr;
 }
 
 dodo::framebuffer::framebuffer_base::framebuffer_base(framebuffer_base &&other) noexcept
 {
-	if (*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER_BINDING) == &other)
-		*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER_BINDING) = this;
-	if (*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER_BINDING) == &other)
-		*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER_BINDING) = this;
+	if (*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER) == &other)
+		*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER) = this;
+	if (*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER) == &other)
+		*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER) = this;
 }
 
 dodo::framebuffer::framebuffer_base& dodo::framebuffer::framebuffer_base::operator=(framebuffer_base &&other) noexcept
 {
-	if (*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER_BINDING) == &other)
-		*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER_BINDING) = this;
-	if (*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER_BINDING) == &other)
-		*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER_BINDING) = this;
+	if (*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER) == &other)
+		*internal_get_bound_frambuffer(GL_READ_FRAMEBUFFER) = this;
+	if (*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER) == &other)
+		*internal_get_bound_frambuffer(GL_DRAW_FRAMEBUFFER) = this;
 	return *this;
 }
 
