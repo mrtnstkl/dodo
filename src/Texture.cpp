@@ -63,7 +63,7 @@ dodo::texture dodo::texture::create_tex_image_2d(GLenum target, GLenum internal_
 }
 
 
-dodo::texture dodo::texture::from_image_file(const char* path)
+dodo::texture dodo::texture::from_image_file(const char* path, bool flip_vertical)
 {
 	texture texture;
 	texture.target_ = GL_TEXTURE_2D;
@@ -73,7 +73,7 @@ dodo::texture dodo::texture::from_image_file(const char* path)
 
 	// upload image data to gpu
 	int height, width, num_col_ch;
-	stbi_set_flip_vertically_on_load_thread(false);
+	stbi_set_flip_vertically_on_load_thread(flip_vertical);
 	auto* data = stbi_load(path, &width, &height, &num_col_ch, 0);
 
 	if (stbi_failure_reason())

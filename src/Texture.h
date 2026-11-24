@@ -39,7 +39,7 @@ namespace dodo
 		                                   GLenum format, GLenum type, const GLvoid* data = nullptr);
 
 
-		static texture from_image_file(const char* path);
+		static texture from_image_file(const char* path, bool flip_vertical = false);
 
 		static texture cubemap_from_image_files(const char* path_pos_x, const char* path_pos_y,
 			const char* path_pos_z, const char* path_neg_x,
